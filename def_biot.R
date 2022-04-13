@@ -130,7 +130,7 @@ getwd()
 deforest <- do.call(
 
 
-#5. Guardar raster Deforestacion. Estos raster tendrán valores 0-1. En mi flujo
+#5. Guardar raster Deforestacion. Estos raster tendrÃ¡n valores 0-1. En mi flujo
 # de trabajo en el siguiente paso para hacer Merge, tuve que reclasificarlos 
 # por segunda vez en 1-NA, para remover los ceros. 
 writeRaster(D17, filename = "Defores2017_2018", format="GTiff", overwrite=TRUE)
@@ -180,13 +180,7 @@ D17<- reclassify(rasters[[17]], rcl)
 #Merge
 #Cuando se hace merge, el elemento 1 de la lista es el que queda encima de todo
 # Por eso empiezo a hacer merge
-# desde el ultimo año de perdida de bosque (2018-2017), para quede quede encima 
-#e  ir adicionando los siguientes años hacia atrás
+# desde el ultimo aÃ±o de perdida de bosque (2018-2017), para quede quede encima 
+#e  ir adicionando los siguientes aÃ±os hacia atrÃ¡s
 
-A1 <- merge(D18, D17)
-A2 <- merge(A1, D16)
-
-plot(A1)
-
-writeRaster(A17, filename="Defores2000_2018.tif", overwrite=TRUE)
 
