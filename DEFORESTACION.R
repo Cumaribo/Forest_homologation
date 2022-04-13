@@ -7,30 +7,128 @@
 library(raster)
 library(rgdal)
 library(sp)
-
+library(tidyverse)
+library(furrr)
 #This needs to be converted into using gdal or terra. Not raster anymore 
 
-# Setting working directory and temporary folder -----------------------------------------
 
+                                        # Setting working directory and temporary folder -----------------------------------------
+path=("/storage/home/TU/tug76452/biotablero/binary/Container_tmp")
+setwd(path)
+
+#path=("/storage/home/TU/tug76452/biotablero/binary/outputs")
+#setwd(path)
+
+#Set temporary folder. Here it is key!Troop
+dir.create('tempfiledir')
+tempdir=paste(getwd(),'tempfiledir', sep="/")
+rasterOptions(tmpdir=tempdir)
 
 #1. Cargar los raster de Bosque Armonizados de Hansen ------------
 #Estos son los raster procesados por Jeronimo usando Hansen
-# Set list of rasters to process
-tiffs <- list.files('.'pattern='tif')
-#load rasters
-tiffs1<-list()
-for(i in (1:length(tiffs)){
-  tiffs1[i]<-tiffs[i]
-  }
 
-#3. Set biannual forest loss calculation ------
-def<-function(t1, t2){
-  floss<-(foct1 - foct2)
-  return(floss)
-  }
-#4 Run the function over the list 
-    ydef<-future(map(2:(length(tiffs1)-1), function(x) def(tiffs1[[x]],tiffs1[[x+1]])) 
-    
+tiffs<-list.files('.', pattern='tif')
+
+tiffs <- tiffs[c(14:18)]
+
+r.list<-list()
+for(i in 1:(length(tiffs)-1)){
+  r.list[i]<-raster(tiffs[i])
+}
+
+r.list2<-list()
+
+for(i in 2:length(tiffs)){
+  r.list2[i]<-raster(tiffs[i])
+}
+r.list2 <- r.list2[-1]
+
+r.list[[4]]
+r.list2[[4]]
+
+floss <-function(raso, rasi){
+    def <- raso-rasi
+    return(def)}
+
+
+mem_future <- 5000*1024^2 #this is toset the limit to 5GB
+plan(multisession, workers=4)
+ options(future.globals.maxSize= mem_future)
+
+reclv <- c(14:18)
+
+mult_one <- function(var1, var2)
+{
+    def <- var1*var2
+    return(def)
+}
+
+tiffs
+
+namer <- map(1:length(tiffs), function(x) substr(tiffs[x], 8,11))
+namer <- unlist(namer)
+namer <- namer[-1]
+
+
+path=("/storage/home/TU/tug76452/biotablero/binary/outputs")
+setwd(path)
+
+#2. Calculate Forest loss between years ------
+#dir.create('outputs')
+
+#wd=paste(getwd(),'outputs', sep="/")
+#setwd(wd)
+
+getwd()
+
+                                        #4. Reclasificar rasters en caso de que alguno tenga valores -1. ------- 
+#Este valor representa ganancia, pero hay que descartarlo porque lo que nos importa es 
+# lo que se perdio. 
+
+#The complicated issue here is that running all at anoce has been a problem (memory) and when running by batvhes i get all kinds of issues (stupiud errors, memory, and last but not least, knowimng the right position is an issue (the indeces to map the functions)
+
+deforest <- map(1:length(r.list), function(x) floss(r.list[[x]],r.list2[[x]]))
+                                        # Reclassify values by the year offorest loss
+deforest <-map(1:length(deforest), function(x) mult_one(deforest[[x]], reclv[x]))
+                                        # save rasters
+map(1:length(deforest), function(x) writeRaster(deforest[[x]], paste('def_2',namer[x], sep='_'), format='GTiff', overwrite=TRUE))
+
+
+
+
+
+
+
+writeRaster(deforest[[1]], paste('def_2',namer[1], sep='_'), format='GTiff', overwrite=TRUE)
+
+deforest[[1]]
+namer[1]
+
+deforest
+
+
+
+r.list
+
+r.list<-list()
+for(i in 1:length(tiffs)){
+    r.list[i]<-raster(tiffs[i])
+}
+deforest <-map(1:length(r.list), function(x) mult_one(r.list[[x]], reclv[x]))
+tiffs <- map(1:length(tiffs), function(x) substr(tiffs[x], 8,11))
+namer <- unlist(namer)
+map(1:length(deforest), function(x) writeRaster(deforest[[x]], paste('def_2',namer[x], sep='_'), format='GTiff', overwrite=TRUE))
+
+
+reclv
+
+
+r.list
+
+getwd()
+
+deforest <- do.call(
+
 
 #5. Guardar raster Deforestacion. Estos raster tendrán valores 0-1. En mi flujo
 # de trabajo en el siguiente paso para hacer Merge, tuve que reclasificarlos 
