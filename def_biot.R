@@ -5,8 +5,7 @@
 
 #Necesary packages-------------------------------------------------------
 paks<-c('raster', 'rgdal','sp', 'tidyverse', 'furrr')
-
-lapply(require(paks). Fix this ()
+sapply(packs, require, character.only = TRUE)
         
 #This needs to be converted into using gdal or terra. Not raster anymore 
 
