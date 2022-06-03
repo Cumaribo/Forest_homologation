@@ -4,5 +4,6 @@ This repository contains the scrtipts and the documentation of the forest armoni
 Here, i set the basic documentation, but especially will register the paths and locations of the inputs and outputs. Each time I come back here and have to do something with this i waste a lot of time and energy (and of course my ADHD does not help AT ALL) trying to remember where the fuck is everything and feeling nervous that i will use the wrong one.
 
 How is it possible that i still don't know where the Masked and unmasked rasters ares and what the last version of the code is!
-
+\In NIMBUS:
+1. path=("/storage/home/TU/tug76452/biotablero/binary/Container_tmp"). Final masked armonized masks. Need the unmasked.  
 
