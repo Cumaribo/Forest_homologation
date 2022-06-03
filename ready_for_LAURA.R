@@ -43,6 +43,7 @@ writeRaster(hansen19, 'hansen2019_bin.tif', overwrite=TRUE)
 ideam19<-raster('ideamfnF2019_rec.tif')
 hansen19<-raster('hansen2019_bin.tif')
 
+#Use split rast to diovide the maps into smaller chunks. The
 SplitRas <- function(raster,ppside,save,plot){
     h        <- ceiling(ncol(raster)/ppside)
     v        <- ceiling(nrow(raster)/ppside)
@@ -71,16 +72,32 @@ SplitRas <- function(raster,ppside,save,plot){
         }
 
 
+m<-c(2.1,3.1,NA)
+m<-matrix(m, ncol=3,byrow=TRUE)
+ideam19<-reclassify(ideam19,m)
 ideam19sp<-SplitRas(ideam19, ppside=12, save=FALSE, plot=FALSE)
 hansen19sp<-SplitRas(hansen19, ppside=12, save=FALSE, plot=FALSE)
+ideam19sp<-ideam19sp[-c(1:4,9:15,20:25,32:37, 46:49,61,73,107, 109,110,111,119:125, 131:140,143,144)]   
+hansen19sp<-hansen19sp[-c(1:4,9:15,20:25,32:37, 46:49,61,73,107, 109,110,111,119:125, 131:140,143,144)]  
 rm(ideam19, hansen19)
 mem_future <- 5000*1024^2 #this is toset the limit to 1GB
 plan(multisession, workers=5)
 options(future.globals.maxSize= mem_future)
-comparedata<- future_map(1:length(ideam19sp), function(x) CompareClassification(ideam19sp[[x]], hansen19sp[[x]], names = list('Ideam_19'=c('no-Forest','forest', 'no-data'),'Hansen_19'=c('no-Forest','forest','no-data')), samplefrac = 1)
-                        agg<-do.call(merge, comparedata$raster)
-                         writeRaster(agg, 'agg_for_19.tif')
+comparedata<- future_map(1:length(ideam19sp), function(x) CompareClassification(ideam19sp[[x]], hansen19sp[[x]], names = list('Ideam_19'=c('no-Forest','forest'),'Hansen_19'=c('no-Forest','forest')), samplefrac = 1))
+#Extract rassters from comparedata object
+rat<-list()
+for(i in 1:length(comparedata)){
+    rat[i]<-comparedata[[i]][[1]]
+}
+#merge rasters 
+agg<-do.call(merge, rat)
 
+writeRaster(agg, 'agg_for_19.tif')
+ 
                         write.csv(comparedata$table, file='cont_mat.csv')
 
-                        
+
+getwd()
+
+agg
+
