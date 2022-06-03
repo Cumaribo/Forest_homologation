@@ -77,8 +77,10 @@ rm(ideam19, hansen19)
 mem_future <- 5000*1024^2 #this is toset the limit to 1GB
 plan(multisession, workers=5)
 options(future.globals.maxSize= mem_future)
-comparedata<- future_map(1:length(ideam19sp), function(x) CompareClassification(ideam19[[x]], hansen19[[x]], names = list('Ideam_19'=c('no-Forest','forest', 'no-data'),'Hansen_19'=c('no-Forest','forest','no-data')), samplefrac = 1)
+comparedata<- future_map(1:length(ideam19sp), function(x) CompareClassification(ideam19sp[[x]], hansen19sp[[x]], names = list('Ideam_19'=c('no-Forest','forest', 'no-data'),'Hansen_19'=c('no-Forest','forest','no-data')), samplefrac = 1)
                         agg<-do.call(merge, comparedata$raster)
                          writeRaster(agg, 'agg_for_19.tif')
 
                         write.csv(comparedata$table, file='cont_mat.csv')
+
+                        
