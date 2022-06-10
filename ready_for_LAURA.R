@@ -1,201 +1,103 @@
 # This code reviewed on 18/04/2022
 
-getwd()
-
-rm(list=ls())
-
 
 ##############################
-library(raster)
-library(rgdal)
-library(forestChange)
-library(parallel)
-library(sf)
-library(tidyverse)
-library(purrr)
-library(furrr)
-library(diffeR)
-library(useful)
-library(greenbrown)
-library(data.table)
+packs<-c('raster', 'rgdal', 'tidyverse', 'useful','diffeR', 'greenbrown', 'gdalUtils', 'gdalUtilities', 'furrr')
+sapply(packs, require, character.only = TRUE) 
 
-
-getwd()
-
-
-dir.create('tempfiledir')
-
+#Ready environment
+#dir.create('tempfiledir')
 tempdir=paste(getwd(),'tempfiledir', sep="/")
 rasterOptions(tmpdir=tempdir)
-unixtools::set.tempdir('/media/mnt/Ecosistemas_Colombia/tempfiledir')
 
-setwd("/Forest_armonization/Ecosistemas_Colombia/hansen_ideam")
+#1. Reproject/align
+hansen19<-raster('/media/mnt/Forest_Armonization/Armonized_nomsk/armonized_2019a.tif')
 
+target<-'/media/mnt/Forest_Armonization/SMBYC_Data/cambio_2018_2019_v8_200707_3116.img'
+reference. <-"/media/mnt/Forest_Armonization/mask_ideam90_17.tif"
+dst.<-'/media/mnt/Forest_Armonization/cambio18_19.tif'
+align_rasters(unaligned=target, reference=reference., dstfile=dst., nthreads=6, verbose= TRUE)
 
-mun <- st_read('/media/mnt/Ecosistemas_Colombia/biomas_wgs84.shp')
-labels <- (mun$BIOMA_IAvH)
-mun <- as(mun, 'Spatial')
-# split mun into list of independent polygons  
-biomat <- mun%>%split(.$BIOMA_IAvH)
+#Homologue Classes
+ideam19<-raster('/media/mnt/Forest_Armonization/cambio18_19.tif')
+m<-c(1.9, 2.1, 5, 3.9, 4.1, 1)
+m<-matrix(m, ncol=3, byrow=TRUE)
+##### r
+ideam19<-reclassify(ideam19, m)                                        # imagen a alienar
+ writeRaster(ideam19, 'ideamfnF2019.tif')
+msk<-raster('/media/mnt2/BiomapCol_22/mask_colombia.tif')
+m<-c(4.9, 5.1, 0, 0,0, NA)
+m<-matrix(m, ncol=3, byrow=TRUE)
+ideam19<-reclassify(ideam19, m)                                     
 
-#######################################################################################################
-#Chreate vector withthe names 
-names <- as.list(mun$BIOMA_IAvH)
-names <- map(1:length(names), function(x) as.character(names[[x]]))
-namesu <- unlist(names)
+ideam19<-mask(ideam19, msk)
+writeRaster(ideam19,'ideamfnF2019_rec.tif', overwrite=TRUE)
+m<-c(NA, NA, 0)
+m<-matrix(m, ncol=3, byrow=TRUE)
 
-# i had to do this because bioma #7 has no valid data and the function would not run there (in the case of Ideam maps) 
-namesu <- namesu[-7]
+hansen19<-reclassify(hansen19, m)
+hansen19<-mask(hansen19, msk)
+writeRaster(hansen19, 'hansen2019_bin.tif', overwrite=TRUE)
 
+#load hansen ideam
+ideam19<-raster('ideamfnF2019_rec.tif')
+hansen19<-raster('hansen2019_bin.tif')
 
-# this function uses the package diffeR to compare between pairs of maps. It does not produce agreement maps, only contingency matrices. It works faster and does not require that both maps have pixels form all classes
-#######################THIS IS THE FUNCTION THAT I NEED TO USE NOW (03/03/2021) Here we are, on 18/04/2022
-# still messing with this thing, but i finally know where we're going. 
-
-
-comparer2 <- function(ideam1,ideam2, perc){
-  test1 <- crosstabm(ideam1, ideam2, percent=perc, population=NULL)
-  return(test1)}
-
-#1. Load the agreement maps:
-  
-  setwd()
-#ideam Agreement (change) maps
-listr <- list.files('.', 'ag_id_msk')
-ideam_ag <- list()
-for(i in 1:length(listr)){
-  ideam_ag[[i]] <- raster(listr[i])}
-
-
-setwd('/Forest_armonization/Ecosistemas_Colombia/agreement_masked')
-test_match <- function(ideam1, ideam2){
-    extent(ideam1)==extent(ideam2)}
-
-length(namesu)
-#don't know what happened here
-namesu2 <- namesu[-250]
-
-# load the masked Hansen agreement maps. Remember to change the band number for each threshold. 
-#Band 1 is threshold= 20%, 9 is t=100% (it goes up to 22 with the last review) 
-
-listr <- list.files(".", "ag_ha_msk")
-###########There msut be a reason for this, no idea which one. Don't know if it matters. 
-ideam_ag. <- ideam_ag[-250]
-hansen.<- hansen[-250]
-############
-#This section is supposed to map over the whole list of biomes and compare each pair of maps 
-# and load them by threshold and run the comparison for the change maps between ideam and hansen 
- #create an empty container list
-#date 2
-bnd <- 1
-#we move this part
-bnd2 <- 20
-hansen <- list()
-for(i in 1:length(listr)){
-    hansen[[i]] <- raster(listr[i], band=bnd)}
-hansen.<- hansen[-250]
-gtest <- map(1:length(hansen.), function(x) test_match(hansen.[[x]], ideam_ag.[[x]]))
-unlist(gtest)
-mem_future <- 1000*1024^2 #this is to set the limit to 1GB
-plan(multisession, workers=7)
-options(future.globals.maxSize= mem_future)
-diff_mat<- future_map(1:length(hansen.), function(x) comparer2(ideam_ag.[[x]], hansen.[[x]], perc=FALSE))
-names(diff_mat) <- namesu2
-namer <- paste('ag_id_ha', bnd2, sep='_')
-
-#I remember here, This code has issues (line 104) onwards as it names and stores the list of rdatas without messing wit hte names of the
-#object, which is the result of the function, but this can be fixed somehow (don't know how for the moment)
+#Use split rast to diovide the maps into smaller chunks. The
+SplitRas <- function(raster,ppside,save,plot){
+    h        <- ceiling(ncol(raster)/ppside)
+    v        <- ceiling(nrow(raster)/ppside)
+    agg      <- aggregate(raster,fact=c(h,v))
+    agg[]    <- 1:ncell(agg)
+    agg_poly <- rasterToPolygons(agg)
+    names(agg_poly) <- "polis"
+    r_list <- list()
+    for(i in 1:ncell(agg)){
+        e1          <- extent(agg_poly[agg_poly$polis==i,])
+        r_list[[i]] <- crop(raster,e1)
+    }
+    if(save==T){
+        for(i in 1:length(r_list)){
+            writeRaster(r_list[[i]],filename=paste("SplitRas",i,sep=""),
+                        format="GTiff",datatype="FLT4S",overwrite=TRUE)
+        }
+    }
+    if(plot==T){
+        par(mfrow=c(ppside,ppside))
+        for(i in 1:length(r_list)){
+            plot(r <- list[[i]],axes=F,legend=F,bty="n",box=FALSE)
+        }
+    }
+    return(r_list)
+        }
 
 
-##############################
-#I had to do this because i did not know (and would have surely been better to solve than to do what
-# I did whic was repeating the thing and manually changing the names of the objects (and less likely to 
-# commit errors)
-
-diff_mat_20 <- diff_mat
-save(diff_mat_20, file=paste(namer, '.RData', sep=''))
-
-diff_mat_30 <- diff_mat
-save(diff_mat_30, file=paste(namer, '.RData', sep=''))
-
-#diff_mat_40 <- diff_mat
-#save(diff_mat_40, file=paste(namer, '.RData', sep=''))
-#diff_mat_50 <- diff_mat
-#save(diff_mat_50, file=paste(namer, '.RData', sep=''))
-#diff_mat_55 <- diff_mat
-#save(diff_mat_55, file=paste(namer, '.RData', sep=''))
-#diff_mat_60 <- diff_mat
-#save(diff_mat_60, file=paste(namer, '.RData', sep=''))
-#diff_mat_65 <- diff_mat
-#save(diff_mat_65, file=paste(namer, '.RData', sep=''))
-#diff_mat_70 <- diff_mat
-#save(diff_mat_70, file=paste(namer, '.RData', sep=''))
-#diff_mat_75 <- diff_mat
-#save(diff_mat_75, file=paste(namer, '.RData', sep=''))
-#diff_mat_80 <- diff_mat
-#save(diff_mat_80, file=paste(namer, '.RData', sep=''))
-#diff_mat_85 <- diff_mat
-#save(diff_mat_85, file=paste(namer, '.RData', sep=''))
-#diff_mat_90 <- diff_mat
-#save(diff_mat_90, file=paste(namer, '.RData', sep=''))
-#diff_mat_95 <- diff_mat
-#save(diff_mat_95, file=paste(namer, '.RData', sep=''))
-diff_mat_100 <- diff_mat
-save(diff_mat_100, file=paste(namer, '.RData', sep=''))
-############################################
-
-#The difference matrices are not complete (only 14, the others shpuld be somewhere, i'll find them)
-# This see,s like an attempt to solve the problem i just mentioned, Past me seems to have already 
-# noticed this issue, and surely spent some time grunting about it,
-
-save([assign(paste('ag_id_ha', bnd2, sep='_')], diff_mat_30)),file=paste(namer, '.RData', sep='')
-
-
-assign(paste('ag_id_ha', bnd2, sep='_'), diff_mat_30)
-
-assign(paste('ag_id_ha', bnd2, sep='_')) <- diff_mat_20 
-
-msk <- raster('mask_ideam90_17.tif')
-
-
-
-
-setwd('/media/mnt/Ecosistemas_Colombia/Agreement_ideam_2010_2017')
-
-
-ideam_ag <- raster('change10_17_col.tif')
-
-ideam_ag <- mask(ideam_ag,msk)
-
+m<-c(2.1,3.1,NA)
+m<-matrix(m, ncol=3,byrow=TRUE)
+ideam19<-reclassify(ideam19,m)
+ideam19sp<-SplitRas(ideam19, ppside=12, save=FALSE, plot=FALSE)
+hansen19sp<-SplitRas(hansen19, ppside=12, save=FALSE, plot=FALSE)
+ideam19sp<-ideam19sp[-c(1:4,9:15,20:25,32:37, 46:49,61,73,107, 109,110,111,119:125, 131:140,143,144)]   
+hansen19sp<-hansen19sp[-c(1:4,9:15,20:25,32:37, 46:49,61,73,107, 109,110,111,119:125, 131:140,143,144)]  
+rm(ideam19, hansen19)
 mem_future <- 5000*1024^2 #this is toset the limit to 1GB
+plan(multisession, workers=5)
 options(future.globals.maxSize= mem_future)
-plan(multisession, workers=7)
-a <-c(351:397)
-namesu2 <- namesu[a]
-biomat2 <- biomat[a]
-cropped <- future_map(a, function(x) crop(ideam_ag, extent(biomat[[x]])))
-maskedt <-map(1:length(cropped), function(x) raster::mask(cropped[[x]], biomat2[[x]]))
-#mem_future <- 20000*1024^2 #this is toset the limit to 1GB
-#options(future.globals.maxSize= mem_future)
-#plan(multisession, workers=7)
+comparedata<- future_map(1:length(ideam19sp), function(x) CompareClassification(ideam19sp[[x]], hansen19sp[[x]], names = list('Ideam_19'=c('no-Forest','forest'),'Hansen_19'=c('no-Forest','forest')), samplefrac = 1))
+#Extract rassters from comparedata object
+rat<-list()
+for(i in 1:length(comparedata)){
+    rat[i]<-comparedata[[i]][[1]]
+}
+#merge rasters 
+agg<-do.call(merge, rat)
 
-setwd('/media/mnt/Ecosistemas_Colombia/agreement_masked')
-
-map(1:length(maskedt), function(x) writeRaster(maskedt[[x]], paste('ag_id_msk', namesu2[x], sep='_'), format='GTiff', overwrite=TRUE))
-
+writeRaster(agg, 'agg_for_19.tif')
+ 
+                        write.csv(comparedata$table, file='cont_mat.csv')
 
 
+getwd()
 
-extent(biomat[[1]])
+agg
 
-namesu
-a <-c(329:397)
-namesu2 <- namesu[a]
-biomat2 <- biomat[a]
-biomat2
-cropped <-map(a, function(x) crop(mask <- ideam, extent(biomat[[x]])))
-maskedt <-map(1:length(cropped), function(x) raster::mask(cropped[[x]], biomat2[[x]]))
-options(future.globals.maxSize= mem <- future)
-plan(multisession, workers=6)
-namesu3 <- namesu[329:397]
-map(1:length(maskedt), function(x) writeRaster(maskedt[[x]], paste('msk_ideam', namesu3[x], sep='_'), format='GTiff', overwrite=TRUE))
