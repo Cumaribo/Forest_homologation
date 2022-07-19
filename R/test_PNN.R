@@ -7,7 +7,7 @@ library(parallel)
 #setwd('/storage/home/TU/tug76452/Forest_Armonization')
 #lab
 setwd('/media/mnt/Forest_Armonization')
-
+setwd('/Volumes/tug76452/Forest_Armonization')
 
 dir.create('tempfiledir')
                                         #obtain string with the path
@@ -24,15 +24,16 @@ td <- getwd()
 # 1 . Set files
 
 shps <- list.files('/media/mnt/Forest_Armonization/SINAP_areas/', pattern='shp')
+shps <- list.files('/Volumes/tug76452/Forest_Armonization/SINAP_areas', pattern='shp')
 shps <- map(1:length(shps), function(x) str_sub(shps[x], start=1, end=9))
 shps <- unlist(shps)
-setwd('/media/mnt/Forest_Armonization/SINAP_areas/')
+setwd('/Volumes/tug76452/Forest_Armonization/SINAP_areas')
 # st_read
 sfs <- map(1:6, function(x) st_read('.', shps[x]))
 
 #3 Load template to rasterize
 temp <- raster('/media/mnt2/BiomapCol_22/mask_colombia.tif')
-
+temp <- raster('/Volumes/tug76452/Forest_Armonization/SINAP_areas/mask_01.tif')
 #temp2 <- raster('/Users/sputnik/Documents/bosque-nobosque/IDEAMfnf/msk_SMBYC.tif')
 #4. Reproject to the crs of the template
 sfs <- map(1:6, function(x) st_transform(sfs[[x]], crs(temp)))
@@ -176,7 +177,6 @@ harm6 <- map(1:length(harm6),function(x) mask(harm6[[x]], temp[[6]]))
 
 #
 
- m <- c(0.9, )
 sfsf1 <- (list(sfs1[[1]],sfs2[[1]],sfs3[[1]],sfs4[[1]],sfs5[[1]],sfs6[[1]])) # El Tuparro 
 sfsf2 <- (list(sfs1[[2]],sfs2[[2]],sfs3[[2]],sfs4[[2]],sfs5[[2]],sfs6[[2]])) # Los Nevados  
 sfsf3 <- (list(sfs1[[3]],sfs2[[3]],sfs3[[3]],sfs4[[3]],sfs5[[3]],sfs6[[3]])) # Sanquianga 
@@ -244,9 +244,6 @@ save(agg6p, file='agg6p.RData')
 
 years. <- unlist(map(1:length(tiffes), function(x) str_sub(tiffes[x], start=10, end=17)))
 
-
-
-
 #Extract maps 
 m <- c(0.9, 7.1, 0, 7.9, 8.1, 1, 8.9, Inf, 0)
 m <- matrix(m, ncol=3, byrow=TRUE)
@@ -267,13 +264,11 @@ sfsf6 <- map(1:length(sfsf6), function(x) reclassify(sfsf6[[x]], m))
 sfsf1[[1]]
 
 
-compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
+compgb <- function(ref,tar,names, years){
   comparedata<- CompareClassification(ref, tar, names = list('GLAD_ARM'=c('No bosque',  'bosque'),'PNN'=c('no bosque', 'bosque')), samplefrac = 1)
   if(writeraster==TRUE){
     writeRaster(comparedata$raster, paste(names., years, sep='_'), overwrite=TRUE)}
-  if(plotAgMap==TRUE){
-    plot(comparedata)}
-  return(comparedata$table)}
+    return(comparedata$table)}
 
 # compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
 #   comparedata<- CompareClassification(ref, tar, names = list('GLAD_ARM'=c('Aguas Continentales','Aguas Maritimas', 
@@ -298,12 +293,12 @@ compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
 
 years. <- years
 
-gbr1 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # El Tuparro
-gbr2 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Los Nevados
-gbr3 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Sanquianga
-gbr4 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Serrania de Chiribiquete
-gbr5 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Sierra Nevada
-gbr6 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
+gbr1 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # El Tuparro
+gbr2 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Los Nevados
+gbr3 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Sanquianga
+gbr4 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Serrania de Chiribiquete
+gbr5 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Sierra Nevada
+gbr6 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Tayrona
 
 
 save(gbr1=, file= 'gbr1.RData')
@@ -313,7 +308,7 @@ save(gbr4=, file= 'gbr4.RData')
 save(gbr5=, file= 'gbr5.RData')
 save(gbr6=, file= 'gbr6.RData')
 
-gbr6 <- map(6:6, function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
+gbr6 <- map(6:6, function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Tayrona
 
 
 
@@ -346,20 +341,13 @@ map(1:length(harm6), function(x) writeRaster(harm6[[x]],paste('harm6_bin', years
 
 
 sfs1[[1]]
-
 harm1[[1]]
-
-harm1
-
-[[1]]
-
+#test
 map(1:length(temp), function(x) writeRaster(temp[[x]], paste(names[x], 'msk.tif', sep='_')))
-
 
 plot(temp[[5]])
 
-
-sort(names)
+#Question for stackexchange::
 # create test raster
 ras1 <- raster(ncol=5,nrow=5) 
 pol1 = st_sfc(st_polygon(list(cbind(c(0,3,3,0,0),c(0,0,3,3,0)))))
