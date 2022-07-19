@@ -57,6 +57,9 @@ sfs[[6]] <- sfs[[6]]%>%mutate(NOMBRE = NOM)
 # Next to fix: learn how to nest the lists
  #sfs_nest <- sfs%>%group_by(.$NOMBRE)%>%nest()
 
+#the whole problem is that the datesats are not equal. BTW i am a moron, just needed to drop the attributes i did not need and keep only the ones of forest no forest and the geom. =
+# the rest can go awaY!!!!
+
 #Extract Vector with the names of the PNN (surely will need them in a moment)
 names. <- unique(sfs[[1]][["NOMBRE"]])
 names. <- sort(names.)
@@ -161,15 +164,15 @@ harm6 <- map(1:length(harm6),function(x) mask(harm6[[x]], temp[[6]]))
 #Reclassify harmonized to the same types of PNN
 
 #set reclass matrix
- m <- c(7,9,8.1, 1) 
- m <- matrix(m, ncol=3,byrow=TRUE)
- 
-harm1 <- map(harm1, reclassify, m) #El Tuparro
-harm2 <- map(harm2, reclassify, m) #Los Nevados
-harm3 <- map(harm3, reclassify, m) #Sanquianga
-harm4 <- map(harm4, reclassify, m) #Serrania de Chiribiquete
-harm5 <- map(harm5, reclassify, m) #Sierra Nevada de Santa Marta
-harm6 <- map(harm6, reclassify, m) #Tayrona
+#  m <- c(7,9,8.1, 1) 
+#  m <- matrix(m, ncol=3,byrow=TRUE)
+#  
+# harm1 <- map(harm1, reclassify, m) #El Tuparro
+# harm2 <- map(harm2, reclassify, m) #Los Nevados
+# harm3 <- map(harm3, reclassify, m) #Sanquianga
+# harm4 <- map(harm4, reclassify, m) #Serrania de Chiribiquete
+# harm5 <- map(harm5, reclassify, m) #Sierra Nevada de Santa Marta
+# harm6 <- map(harm6, reclassify, m) #Tayrona
 
 #
 
@@ -186,7 +189,6 @@ sfsf <- map2(1:length(sfsf), function(x) list(sfsf[[x]][[x]]))
 
 harm1[[1]]
 sfsf1[[1]]
-
 
 
 library(diffeR)
@@ -240,7 +242,7 @@ save(agg6p, file='agg6p.RData')
 
 
 
-years <- unlist(map(1:length(tiffes), function(x) str_sub(tiffes[x], start=10, end=17)))
+years. <- unlist(map(1:length(tiffes), function(x) str_sub(tiffes[x], start=10, end=17)))
 
 
 
@@ -294,7 +296,7 @@ compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
 #   return(comparedata$table)}
 
 
-
+years. <- years
 
 gbr1 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # El Tuparro
 gbr2 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Los Nevados
@@ -303,6 +305,13 @@ gbr4 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= n
 gbr5 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Sierra Nevada
 gbr6 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
 
+
+save(gbr1=, file= 'gbr1.RData')
+save(gbr2=, file= 'gbr2.RData')
+save(gbr3=, file= 'gbr3.RData')
+save(gbr4=, file= 'gbr4.RData')
+save(gbr5=, file= 'gbr5.RData')
+save(gbr6=, file= 'gbr6.RData')
 
 gbr6 <- map(6:6, function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
 
