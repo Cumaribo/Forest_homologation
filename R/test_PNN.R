@@ -90,10 +90,12 @@ for(i in 1:length(tiffes)){
  temp <- reclassify(temp,m)
  writeRaster(temp, 'mask_01.tif')
  #already saved!!!!
+ temp <- raster('mask_01.tif')
+ 
  # crop the template raster
 # # for some reason future_map s not working on the Mac. Find out why
 # # I already created this it's on media/mnt/Forest_Armonization/SINAP_areas
-paste the merge here 
+
 map(1:length(harm), function(x) writeRaster(harm[[x]], paste('bin_masked', years[x], sep= '_')))
 # 
 # ((mc.preschedule = TRUE, mc.set.seed = TRUE,
@@ -107,8 +109,8 @@ for(i in 1:length(tiffes)){
   harm[i] <- raster(tiffes[i])}
 
 #crop and mask (what?)for each of the PNN. to be able to rasterize. (name_pmm.tif)
-temp <-map(1:length(sfs1), function(x)  crop(temp, extent(sfs[[1]][[x]]))) 
-temp <-map(1:length(sfs1), function(x)  mask(temp[[x]], sfs[[1]][[x]])) 
+temp <-map(1:length(sfs), function(x)  crop(temp, extent(sfs[[1]][[x]]))) 
+temp <-map(1:length(sfs), function(x)  mask(temp[[x]], sfs[[1]][[x]])) 
 
 # for each year. Data rasterized (each one is each park)
 
@@ -159,7 +161,7 @@ harm6 <- map(1:length(harm6),function(x) mask(harm6[[x]], temp[[6]]))
 #Reclassify harmonized to the same types of PNN
 
 #set reclass matrix
- m <- c(0.9,1.1, 8) 
+ m <- c(7,9,8.1, 1) 
  m <- matrix(m, ncol=3,byrow=TRUE)
  
 harm1 <- map(harm1, reclassify, m) #El Tuparro
@@ -169,7 +171,9 @@ harm4 <- map(harm4, reclassify, m) #Serrania de Chiribiquete
 harm5 <- map(harm5, reclassify, m) #Sierra Nevada de Santa Marta
 harm6 <- map(harm6, reclassify, m) #Tayrona
 
-# 
+#
+
+ m <- c(0.9, )
 sfsf1 <- (list(sfs1[[1]],sfs2[[1]],sfs3[[1]],sfs4[[1]],sfs5[[1]],sfs6[[1]])) # El Tuparro 
 sfsf2 <- (list(sfs1[[2]],sfs2[[2]],sfs3[[2]],sfs4[[2]],sfs5[[2]],sfs6[[2]])) # Los Nevados  
 sfsf3 <- (list(sfs1[[3]],sfs2[[3]],sfs3[[3]],sfs4[[3]],sfs5[[3]],sfs6[[3]])) # Sanquianga 
@@ -189,7 +193,7 @@ library(diffeR)
 library(greenbrown)
 
 
-
+years. <- years
 #Extract Sq cont. matrices
 
 compdiff <- function(ref,tar, perc){
@@ -215,29 +219,79 @@ agg6 <- map(1:length(harm6), function(x) compdiff(harm6[[x]], sfsf6[[x]], perc =
 agg6p <- map(1:length(harm6), function(x) compdiff(harm6[[x]], sfsf6[[x]], perc =  FALSE))
  #Homologue Classes. 
 
+
+save(agg1, file='agg1.RData')
+save(agg1p, file='agg1p.RData')
+
+save(agg2, file='agg2.RData')
+save(agg2p, file='agg2p.RData')
+
+save(agg3, file='agg3.RData')
+save(agg3p, file='agg3p.RData')
+
+save(agg4, file='agg4.RData')
+save(agg4p, file='agg4p.RData')
+
+save(agg5, file='agg5.RData')
+save(agg5p, file='agg5p.RData')
+
+save(agg6, file='agg6.RData')
+save(agg6p, file='agg6p.RData')
+
+
+
 years <- unlist(map(1:length(tiffes), function(x) str_sub(tiffes[x], start=10, end=17)))
 
+
+
+
 #Extract maps 
+m <- c(0.9, 7.1, 0, 7.9, 8.1, 1, 8.9, Inf, 0)
+m <- matrix(m, ncol=3, byrow=TRUE)
+sfsf1 <- (list(sfs1[[1]],sfs2[[1]],sfs3[[1]],sfs4[[1]],sfs5[[1]],sfs6[[1]])) # El Tuparro 
+sfsf2 <- (list(sfs1[[2]],sfs2[[2]],sfs3[[2]],sfs4[[2]],sfs5[[2]],sfs6[[2]])) # Los Nevados  
+sfsf3 <- (list(sfs1[[3]],sfs2[[3]],sfs3[[3]],sfs4[[3]],sfs5[[3]],sfs6[[3]])) # Sanquianga 
+sfsf4 <- (list(sfs1[[4]],sfs2[[4]],sfs3[[4]],sfs4[[4]],sfs5[[4]],sfs6[[4]])) # Serrania de Chiribiquete El tupparo 
+sfsf5 <- (list(sfs1[[5]],sfs2[[5]],sfs3[[5]],sfs4[[5]],sfs5[[5]],sfs6[[5]])) # Sierra Nevada de Santa Marta 
+sfsf6 <- (list(sfs1[[6]],sfs2[[6]],sfs3[[6]],sfs4[[6]],sfs5[[6]],sfs6[[6]])) # Tayrona  
+#no he podido
+sfsf1 <- map(1:length(sfsf1), function(x) reclassify(sfsf1[[x]], m))
+sfsf2 <- map(1:length(sfsf2), function(x) reclassify(sfsf2[[x]], m))
+sfsf3 <- map(1:length(sfsf3), function(x) reclassify(sfsf3[[x]], m))
+sfsf4 <- map(1:length(sfsf4), function(x) reclassify(sfsf4[[x]], m))
+sfsf5 <- map(1:length(sfsf5), function(x) reclassify(sfsf5[[x]], m))
+sfsf6 <- map(1:length(sfsf6), function(x) reclassify(sfsf6[[x]], m))
+
+sfsf1[[1]]
+
 
 compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
-  comparedata<- CompareClassification(ref, tar, names = list('GLAD_ARM'=c('Aguas Continentales','Aguas Maritimas', 
-                                                                          'Areas Abiertas, sin o con poca Vegetacion','Areas Agricolas Heterogeneas',
-                                                                          'Areas con Vegetacion Herbacea y/o Arbustiva',
-                                                                          'Areas Humedas Continentales',
-                                                                          'Bosques','Cultivos Permanentes',
-                                                                          'Nubes', 'Pastos','Zonas Industriales o Comerciales y Redes de Comunicacion',
-                                                                          'Zonas Verdes Artificializadas, no Agricolas'),'PNN'=c('Aguas Continentales','Aguas Maritimas', 
-                                                                                                                                 'Areas Abiertas, sin o con poca Vegetacion','Areas Agricolas Heterogeneas',
-                                                                                                                                 'Areas con Vegetacion Herbacea y/o Arbustiva',
-                                                                                                                                 'Areas Humedas Continentales',
-                                                                                                                                 'Bosques','Cultivos Permanentes',
-                                                                                                                                 'Nubes', 'Pastos','Zonas Industriales o Comerciales y Redes de Comunicacion',
-                                                                                                                                 'Zonas Verdes Artificializadas, no Agricolas')), samplefrac = 1)
+  comparedata<- CompareClassification(ref, tar, names = list('GLAD_ARM'=c('No bosque',  'bosque'),'PNN'=c('no bosque', 'bosque')), samplefrac = 1)
   if(writeraster==TRUE){
     writeRaster(comparedata$raster, paste(names., years, sep='_'), overwrite=TRUE)}
-if(plotAgMap==TRUE){
-  plot(comparedata)}
+  if(plotAgMap==TRUE){
+    plot(comparedata)}
   return(comparedata$table)}
+
+# compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
+#   comparedata<- CompareClassification(ref, tar, names = list('GLAD_ARM'=c('Aguas Continentales','Aguas Maritimas', 
+#                                                                           'Areas Abiertas, sin o con poca Vegetacion','Areas Agricolas Heterogeneas',
+#                                                                           'Areas con Vegetacion Herbacea y/o Arbustiva',
+#                                                                           'Areas Humedas Continentales',
+#                                                                           'Bosques','Cultivos Permanentes',
+#                                                                           'Nubes', 'Pastos','Zonas Industriales o Comerciales y Redes de Comunicacion',
+#                                                                           'Zonas Verdes Artificializadas, no Agricolas'),'PNN'=c('Aguas Continentales','Aguas Maritimas', 
+#                                                                                                                                  'Areas Abiertas, sin o con poca Vegetacion','Areas Agricolas Heterogeneas',
+#                                                                                                                                  'Areas con Vegetacion Herbacea y/o Arbustiva',
+#                                                                                                                                  'Areas Humedas Continentales',
+#                                                                                                                                  'Bosques','Cultivos Permanentes',
+#                                                                                                                                  'Nubes', 'Pastos','Zonas Industriales o Comerciales y Redes de Comunicacion',
+#                                                                                                                                  'Zonas Verdes Artificializadas, no Agricolas')), samplefrac = 1)
+#   if(writeraster==TRUE){
+#     writeRaster(comparedata$raster, paste(names., years, sep='_'), overwrite=TRUE)}
+# if(plotAgMap==TRUE){
+#   plot(comparedata)}
+#   return(comparedata$table)}
 
 
 
@@ -250,7 +304,7 @@ gbr5 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= n
 gbr6 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
 
 
-gbr6 <- map(1:1, function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
+gbr6 <- map(6:6, function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
 
 
 
@@ -312,7 +366,4 @@ g1 = st_sf(r = 6, pol2)
 
 
 
-pol
-
-raster1 <- fasterize(pol1, raster field=5)
-
+#add the other part (transform the tables into agreement tables)
