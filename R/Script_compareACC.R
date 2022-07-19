@@ -1,3 +1,5 @@
+July 18 2022
+
 rm(list=ls())
 load('/Users/sputnik/Documents/biomas_iavh/selected_areas/accut_f.RData')
 
@@ -96,7 +98,7 @@ accuracies <- function(diff_mat, t, biome){
   # other classes and/or with more than one class, up to empty matrices. I should create a script that adds the missing
   # rows and column full with zeros and generates the required 4x4 matrices. However, because of reasons, this will 
   # need some effort, as in some cases the order of the columns and rows is changed and it would produce wrong results
-  # as this is something that van be solved, but would require time to figure out, and the cases where it happens are 
+  # as this is something that can be solved, but would require time to figure out, and the cases where it happens are 
   # mostly (obviously) small spatial units, i will just bypass them and put zeros in the results and deal with it latter)
   if(nrow(test)<=3){
      output1 <- c(0,0,0,0,0,0,0)
