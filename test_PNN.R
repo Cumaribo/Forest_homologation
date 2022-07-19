@@ -7,10 +7,11 @@ td <- getwd
 #Load vector data as SF
 # 1 . Set files
 shps <- list.files('/Users/sputnik/Documents/bosque-nobosque/SINAP_areas', pattern='shp')
+#leave this here. 
 shps <- map(1:length(shps), function(x) str_sub(shps[x], start=1, end=9))
 shps <- unlist(shps)
-# st_reasd
-sfs <- map(1:6, function(x) st_read(td, shps[x]))
+# st_reas
+sfs <- map(1:6, function(x) st_read('.', shps[x]))
 
 #3 Load template to rasterize
 temp <- raster('/Users/sputnik/Documents/bosque-nobosque/IDEAMfnf/msk_SMBYC.tif')
@@ -35,22 +36,18 @@ sfs <- map(1:length(sfs), function(x) mutate(sfs[[x]], type = case_when(NIVEL2 =
 sfs[[6]] <- sfs[[6]]%>%mutate(NOMBRE = NOM)
 #test to nest. However this is a list not a tidy object, andbtw, the number and names of the attributes is differnet, as 
 #well as the order. This would require some extra work. Let us keep it like this 
-sfs_nest <- sfs%>%group_by(.$NOMBRE)%>%nest()
-
-sfs. <- unlist(sfs)
-
-#Split by PNN
-sfs1 <- sfs[[1]]%>%split(.$NOMBRE)
-sfs2 <- sfs[[2]]%>%split(.$NOMBRE)
-sfs3 <- sfs[[3]]%>%split(.$NOMBRE)
-sfs4 <- sfs[[4]]%>%split(.$NOMBRE)
-sfs5 <- sfs[[5]]%>%split(.$NOMBRE)
-sfs6 <- sfs[[6]]%>%split(.$NOMBRE)
 
 #Extract Vector with the names of the PNN (surely will need them in a moment)
 names <- unique(sfs[[1]][["NOMBRE"]])
 names <- sort(names)
 #load harmonized masked 
+
+sfs <- map(sfs, . %>% split(.$NOMBRE))
+sfs[[1]]           
+#######           
+sfs. <- unlist(sfs)
+#######
+
 mskwd <- '/Users/sputnik/Documents/bosque-nobosque/masked_armonized_2022'
 
 tiffes <- list.files(mskwd, pattern='.tif')
@@ -64,6 +61,7 @@ for(i in 1:length(tiffes)){
 m <- c(-Inf, Inf, 0)
 m <- matrix(m,ncol=3,byrow=TRUE)
 temp <- reclassify(temp,m)
+writeRaster(temp, 'mask_col_0.tif')
 
 harm <- map(1:length(harm), function(x) merge(harm[[x]], temp))
 # crop the template raster
