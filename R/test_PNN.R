@@ -253,7 +253,9 @@ colnames(aggp) <- col_names
 aggp <- as_tibble(aggp)
 
 save(aggp, file= 'agg_all.RDAta')
-
+#################3
+This is waht i need to load next.
+##################3
 aggp%>%filter(pnn=='Serrania_de Chiribiquete')
 
 # # GGplot from here 
