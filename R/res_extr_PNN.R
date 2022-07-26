@@ -1,27 +1,24 @@
-#Result extraction and visualization Comparison PNN
-library(readr)
-load('/Users/sputnik/Documents/bosque-nobosque/rasters_SINAP/agg_all.RDAta')
-col_names <- c('class', 'no_bosque', 'bosque', 'year', 'pnn')
-colnames(aggp) <- col_names
+#Result extraction and visualization Comparison PNN. Pending name change
+#1. Load extracted Aggreement Table. 
+load('~/agg_all.RDAta')
+# Aggreement_metrics
 #1. Get "omission" and "commision" for each class/location/year and add to the table
-#2. Find out which metrics work best for this
-# 3 Some mutate and other data wrangling operations to fill the gaps (get UA, OA and PA)
-# 4 Think about graphs for this.
 
-#Some data manipulation ,conver char into numeric 
-aggp <-  as_tibble(aggp%>%transform(no_bosque= as.numeric(no_bosque), bosque=as.numeric(bosque), year=as.numeric(year)))
-#add sum rowwise
+#Some data manipulation ,convert char into numeric
+sum_agg_met <- function(aggp, classes){
 aggp <- aggp%>%rowwise()%>%mutate(sum_row=sum(no_bosque+bosque))
-# add sum to PA
-aggp <- aggp%>%mutate(sum_row=sum(no_bosque+bosque))%>%group_by(year, pnn)%>%mutate(colsums_nb=sum(no_bosque))%>%mutate(colsums_b=sum(bosque))
-# get  total pixels
+aggp <- aggp%>%mutate(sum_row=sum(no_bosque+bosque))%>%group_by(year, pnn)%>%
+  mutate(colsums_nb=sum(no_bosque))%>%mutate(colsums_b=sum(bosque))
+return(aggp)}
+# Obtain total pixel number
 aggp <- aggp%>%rowwise()%>%mutate(sum_all=sum(colsums_nb+colsums_b))
-# get UA for each class
+# get sensitivity for both classes
 aggp <- aggp%>%mutate(UAnb=sum(no_bosque/sum_row))%>%mutate(UAb=sum(bosque/sum_row))
-# get PA for each class
+# get specificity (PA)
 aggp <- aggp%>%group_by(year, pnn)%>%mutate(PAnb=(no_bosque/colsums_nb))%>%mutate(PAb=(bosque/colsums_b))
-#get OA
-#Get sum of correctly classified classes   
+return(aggp)}
+#get OA (Coincidencia Agregada (lugar/clase))
+#Get sum of all correctly classified pixels   
 aggpoa <- aggp%>%filter(class=='no-bosque')
 aggpoa <- aggpoa[c(1,2)]
 names(aggpoa) <- c('class', 'sum_correct')
@@ -31,21 +28,16 @@ names(aggpoa2) <- 'sum_correct'
 aggpoa[2] <- (aggpoa[2]+aggpoa2[1])
 rm(aggpoa2)
 ######
-aggpp <- aggp%>%filter(class=='no-bosque')%>%cbind(aggpoa[2])
-aggp2 <- aggp%>%filter(class=='bosque')
-aggp <- as_tibble(merge(aggpp, aggp2, all = T))
-rm(aggpp, aggp2)
-
 #GET OA
 aggp <- aggp%>%mutate(OA=sum_correct/sum_all)
 ###### Remove unnecessary values
-UAnb for bosquem PAnb for bosque, UAb for no bosque. PAb for no bosque
-
+#UAnb for bosquem PAnb for bosque, UAb for no bosque. PAb for no bosque
+#Not yet ready#####################
 aggp%>%filter(class=='bosque', UAnb="NA")
 df <- aggp %>% mutate(height = replace(height, height == 20, NA))
-
-#Later 
-
+#Later #########################
+#Plots
+############################################
 #Overall Agreement (lines)
 ggplot(aggp%>%filter(class=='no-bosque'), aes(x=year,y=OA, color=pnn))+#, fill=algorithm))+
   geom_line()+
@@ -64,11 +56,36 @@ ggplot(aggp%>%filter(class=='no-bosque'), aes(x=year,y=OA, color=pnn, fill=pnn))
   #facet_grid(vars(pnn))+
   ggtitle('Overall Agreement')
 
-
-ggplot(aggp%>%filter(class=='bosque')%>%select(c('PAb', 'PAb')), aes(x=year, color=pnn, fill=pnn))+#, fill=algorithm))+
+# Specificity, no Bosque
+ggplot(aggp%>%filter(class=='no-bosque'), aes(x=year,y=PAnb, color=pnn, fill=pnn))+#, fill=algorithm))+
   geom_bar(stat='identity', position = 'dodge')+
   #facet_grid(vars(pnn))+
-  ggtitle('Agreement, forest')
+  ggtitle('Specificity, no bosque')
+
+# Specificity,  Bosque
+ggplot(aggp%>%filter(class=='bosque'), aes(x=year,y=PAb, color=pnn, fill=pnn))+#, fill=algorithm))+
+  geom_bar(stat='identity', position = 'dodge')+
+  #facet_grid(vars(pnn))+
+  ggtitle('Specificity, bosque')
+
+# Sensitivity,  no Bosque
+ggplot(aggp%>%filter(class=='no-bosque'), aes(x=year,y=UAnb, color=pnn, fill=pnn))+#, fill=algorithm))+
+  geom_bar(stat='identity', position = 'dodge')+
+  #facet_grid(vars(pnn))+
+  ggtitle('Sensitivity, no bosque')
+
+# Sensitivity, Bosque
+ggplot(aggp%>%filter(class=='bosque'), aes(x=year,y=UAb, color=pnn, fill=pnn))+#, fill=algorithm))+
+  geom_bar(stat='identity', position = 'dodge')+
+  #facet_grid(vars(pnn))+
+  ggtitle('Sensitivity, bosque')
+
+
+#####SCRATCH#####################################################################################################################################
+##########################################################################################################################################
+
+
+
 pdf(file='test1.pdf',
     width = 16, height=9)
 ggplot(accu_msk, aes(x=pixelcount, y=accuracy, color=interaction(threshold, type), shape=type, group=interaction(type,threshold,biome)))+
