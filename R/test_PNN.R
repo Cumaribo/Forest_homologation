@@ -267,13 +267,11 @@ sfsf6 <- map(1:length(sfsf6), function(x) reclassify(sfsf6[[x]], m))
 sfsf1[[1]]
 
 
-compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
+compgb <- function(ref,tar,names, years){#}, plotAgMap){
   comparedata<- CompareClassification(ref, tar, names = list('GLAD_ARM'=c('No bosque',  'bosque'),'PNN'=c('no bosque', 'bosque')), samplefrac = 1)
-  if(writeraster==TRUE){
-    writeRaster(comparedata$raster, paste(names., years, sep='_'), overwrite=TRUE)}
-  if(plotAgMap==TRUE){
-    plot(comparedata)}
-  return(comparedata$table)}
+  #if(writeraster==TRUE){
+    writeRaster(comparedata$raster, paste(names., years, sep='_'), overwrite=TRUE)
+    return(comparedata$table)}
 
 # compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
 #   comparedata<- CompareClassification(ref, tar, names = list('GLAD_ARM'=c('Aguas Continentales','Aguas Maritimas', 
@@ -298,12 +296,12 @@ compgb <- function(ref,tar,names, years, writeraster, plotAgMap){
 
 years. <- years
 
-gbr1 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # El Tuparro
-gbr2 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Los Nevados
-gbr3 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Sanquianga
-gbr4 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Serrania de Chiribiquete
-gbr5 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Sierra Nevada
-gbr6 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x], writeraster=TRUE, plotAgMap = TRUE)) # Tayrona
+gbr1 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # El Tuparro
+gbr2 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Los Nevados
+gbr3 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Sanquianga
+gbr4 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Serrania de Chiribiquete
+gbr5 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Sierra Nevada
+gbr6 <- map(1:length(harm1), function(x) compgb(harm1[[x]], sfsf1[[x]], names= names.[x], years = years.[x])) # Tayrona
 
 
 save(gbr1=, file= 'gbr1.RData')
