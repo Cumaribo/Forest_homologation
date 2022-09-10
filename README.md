@@ -1,6 +1,10 @@
 # Homologation of Global and National Forest Cover Products 
-
-
+Current location of last script used (in Nimbus):
+'''
+r{
+/storage/home/TU/tug76452/Forest_Armonization/Forest_homologation/R
+}
+'''
 This is the base for a package to obtain forest cover maps from the Golbar forest Cover dataset by Hansen et al (2013) and run a pixelwise comparison with Colombian Forest Cover Datasets produced by the **Forests and Carbon Monitoring System - SMBYC** at the National Institute for Metereology and Environmental Studies (IDEAM).
 
 ## Introduction
