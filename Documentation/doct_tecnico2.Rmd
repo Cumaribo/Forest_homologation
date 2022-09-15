@@ -6,7 +6,7 @@ author:
  - Víctor Hugo Gutiérrez-Vélez^[Temple University]
  - Wilson Lara-Henao^[Temple University]
 affiliation: Temple University
-bibliography: "/Users/sputnik/OneDrive - Temple University/Documentacion_Armonizacion/references_arm.bib"
+bibliography: "/Users/sputnik/Documents/biomas_iavh/Forest_homologation/Documentation/ref_harm.bib"
 date: "`r Sys.Date()`"
 output:   
  pdf_document:
