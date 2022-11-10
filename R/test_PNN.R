@@ -1,4 +1,4 @@
-#Run comparison between SINAP forest maps and Harmonizerd
+#Correr comparaciones entre pares de mapas cl comparison between SINAP forest maps and Harmonizerd
 #setwd('/storage/home/TU/tug76452/Forest_Armonization')
 #lab
 setwd('/media/mnt/Forest_Armonization')
@@ -10,7 +10,7 @@ dir()
 td <- '/Users/sputnik/Documents/bosque-nobosque/SINAP_areas'
 setwd(td)
 #Load vector data as SF
-# 1 . Set files
+# 1 . Set files. Cargar los polígonos y crear vectores para manipular nombres de los archivos para cada año disponible.  
 shps <- list.files('/media/mnt/Forest_Armonization/SINAP_areas/', pattern='shp')
 shps <- list.files('/Volumes/tug76452/Forest_Armonization/SINAP_areas', pattern='shp')
 shps <- list.files('/Users/sputnik/Documents/bosque-nobosque/SINAP_areas', pattern='shp')
@@ -197,15 +197,14 @@ aggp <- map(1:length(agg1p), function(x) cbind(aggp[[x]], years[[x]]))
 # col with names. Thewre is surely a better way to do this.
 
 # Agregar Columna con los nombres (refinar acá, es posible obtener directamente de los nombres)
-
-locs <- c("El_Tuparro","El_Tuparro","Los_Nevados","Los_Nevados","Sanquianga","Sanquianga",
-          "Serrania_de Chiribiquete","Serrania_de Chiribiquete","Sierra_Nevada de Santa Marta",
-          "Sierra_Nevada de Santa Marta","Tayrona","Tayrona")
-
+#Arreglar esto. #Lugares, # de clases
+locs <- unlist(map(1:length(names.), function(x) rep(names.[x], times = 2)))
+# locs <- c("El_Tuparro","El_Tuparro","Los_Nevados","Los_Nevados","Sanquianga","Sanquianga",
+#           "Serrania_de Chiribiquete","Serrania_de Chiribiquete","Sierra_Nevada de Santa Marta",
+#           "Sierra_Nevada de Santa Marta","Tayrona","Tayrona")
 aggp <- map(1:length(agg1p), function(x) cbind(aggp[[x]], locs))
 # class. es un vector de "bosque"'y "no bosque"
 aggp <- map(1:length(agg1p), function(x) cbind(class., aggp[[x]]))
-
 #Unir todas las tablas 
 aggp <- do.call(rbind,aggp)
 #Asignar nombres a las columnas 
@@ -213,6 +212,10 @@ col_names <- c('class', 'no_bosque', 'bosque', 'year', 'pnn')
 colnames(aggp) <- col_names
 #Convertir a Tibble
 aggp <- as_tibble(aggp)
+#convertir a números. Averiguar de donde viene y dónde arreglarlo
+aggp <-  as_tibble(aggp%>%transform(no_bosque= as.numeric(no_bosque), 
+                                    bosque=as.numeric(bosque), year=as.numeric(year)))
+return(aggp)}
 #Salvar
 save(aggp, file= 'agg_all.RDAta')
 ############################################################################################################
@@ -241,12 +244,7 @@ map(1:length(gbr4), function(x) writeRaster(gbr4[[x]]$raster, paste(names.[4], y
 map(1:length(gbr5), function(x) writeRaster(gbr5[[x]]$raster, paste(names.[5], years.[x]), overwrite=TRUE))
 map(1:length(gbr6), function(x) writeRaster(gbr6[[x]]$raster, paste(names.[6], years.[x]), overwrite=TRUE))
 #save tables from greenbrown. The same but another presentation.
-save(gbr1=, file= 'gbr1.RData')
-save(gbr2=, file= 'gbr2.RData')
-save(gbr3=, file= 'gbr3.RData')
-save(gbr4=, file= 'gbr4.RData')
-save(gbr5=, file= 'gbr5.RData')
-save(gbr6=, file= 'gbr6.RData')
+
 
 ############################################################################################################
 ############################################################################################################
