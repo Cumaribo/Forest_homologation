@@ -112,13 +112,13 @@ sfs4 <- map(1:6, function(x) fasterize(sfs[[4]][[x]], temp[[x]], field='type')) 
 sfs5 <- map(1:6, function(x) fasterize(sfs[[5]][[x]], temp[[x]], field='type')) #2017
 sfs6 <- map(1:6, function(x) fasterize(sfs[[6]][[x]], temp[[x]], field='type')) #2018
 
-#Definir matriz de redclasificación, Todo lo que es no bosque -> 0 , Bosque -> 1.
+#Definir matriz de reclasificación, Todo lo que es no bosque -> 0 , Bosque -> 1.
 # Es posible conservar las otras clases de no bosque para analizar la confusión
 # con mas detalle. Por ahora solo es bosque/no-bosque. 
 m <- c(0.9, 7.1, 0, 7.9, 8.1, 1, 8.9, Inf, 0)
 m <- matrix(m, ncol=3, byrow=TRUE)
 #Armar listas por lugar (podría ser  por año, hasta seguro es mejor, pero ya lo hice así)
-# Si, aarreglar acá. Correr sobre el mismo sfsx cambiando elindice en su lugar. 
+# Si, aarreglar acá. Correr sobre el mismo sfsx cambiando el indice en su lugar. 
 # Habría obtenido sfsfx para cada año todos los lugares y no cada lugar todos los años. 
 sfsf1 <- (list(sfs1[[1]],sfs2[[1]],sfs3[[1]],sfs4[[1]],sfs5[[1]],sfs6[[1]])) # El Tuparro 
 sfsf2 <- (list(sfs1[[2]],sfs2[[2]],sfs3[[2]],sfs4[[2]],sfs5[[2]],sfs6[[2]])) # Los Nevados  
