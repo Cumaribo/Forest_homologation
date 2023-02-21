@@ -12,7 +12,7 @@
 getwd()
 unixtools::set.tempdir('/media/mnt/Ecosistemas_Colombia/tempfiledir')
 inpath <- getwd()
-
+%>% 
 
 setwd("/media/mnt/Ecosistemas_Colombia/hansen_ideam")
 

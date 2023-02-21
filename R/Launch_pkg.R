@@ -2,8 +2,8 @@
 # I need to cnvert this into a Rproj file
 #Load greenbrown from source
 #load libraries.
-packs <- c('raster','rgdal', 'tidyverse', 'fasterize', 'landscapemetrics', 'sf',
-           'diffeR', 'greenbrown', 'gdalUtils','gdalUtilities', 'rgeos', 'rasterDT', 
+packs <- c('terra','raster','rgdal', 'tidyverse', 'fasterize', 'landscapemetrics', 'sf',
+           'diffeR', 'gdalUtils','gdalUtilities', 'rasterDT', 
            'ecochange', 'furrr')
 out.. <-  sapply(packs, install.packages, character.only = TRUE)
 out.. <-  sapply(packs, require, character.only = TRUE)
