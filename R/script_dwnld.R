@@ -39,10 +39,15 @@ masked <- as(masked, 'Spatial')
 
 biomat <- masked%>%split(.$biome)
            #Run individual example (documentation R)
+<<<<<<< HEAD
                                         #with one polygon
 
 test <- biomat[[1]]
 
+=======
+#with one polygon
+test <- biomat[[1]]           
+>>>>>>> 95da32ec57ae801abeb4b38478dc52db087cca55
 suppressWarnings(
   def <- echanges(test,   # polígono 
                   lyrs = c('treecover2000','lossyear'),      # nombres de las capas
@@ -53,12 +58,21 @@ suppressWarnings(
 )
 
 #with a list of polygons
+<<<<<<< HEAD
    def <- map(1:1, function(x) echanges(biomat[[x]],   # polígono 
                   lyrs = c('treecover2000','lossyear'),      # nombres de las capas
+=======
+#suppressWarnings(
+  def <- map(1:10, function(x) echanges(biomat[[x]],   # polígono 
+                  lyrs = c('treecover2000','lossyear'),
+                  #eco = 'treecover2000',
+                  #change = 'lossyear',      # nombres de las capas
+>>>>>>> 95da32ec57ae801abeb4b38478dc52db087cca55
                   path = getwd(),      # directorio de trabajo, en caso de que no desees trabajar en el directorio temporal
                   eco_range = c(biomat[[x]]$thrshld,100),      # Umbral de treecover2000
                   change_vals = seq(0,21,1),      # en este caso, los años de pérdida, 
                   mc.cores = 7)     # número de núcleos, solo funciona en sistema linux
+<<<<<<< HEAD
              )
 
 
@@ -81,3 +95,13 @@ $thrshld
 
 
 rlang::last_error()
+=======
+)
+
+labels  
+  
+def. <- map(def, stack)
+
+
+biomat[[1]]$thrshld
+>>>>>>> 95da32ec57ae801abeb4b38478dc52db087cca55
