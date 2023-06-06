@@ -31,3 +31,13 @@ suppressWarnings(
                   change_vals = seq(0,18,1),      # en este caso, los años de pérdida, 
                   mc.cores = 9)     # número de núcleos, solo funciona en sistema linux
 )
+
+tt <- stack(def.)
+
+setwd('/Users/sputnik/Documents/bosque-nobosque/masked_armonized_2022')
+writeRaster(tt, 'test_ec1_10.tif')
+tt <- map(1:length(def), function(x) do.call(stack, def[[x]]))#jueputa!!!!!!
+
+plot(def.[[1]])  
+  ?do.call
+  

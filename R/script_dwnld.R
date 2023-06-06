@@ -98,9 +98,12 @@ rlang::last_error()
 =======
 )
 
-labels  
+  raster_list <- list()
+  for (i in seq_along(def)) {
+    raster_list[[i]] <- def[[i]]
+  }  
   
-def. <- map(def, stack)
+def. <- map(1:def[[1]], stack)
 
 
 biomat[[1]]$thrshld
