@@ -1,7 +1,6 @@
 rm(list=ls())
 load('/Users/sputnik/Documents/biomas_iavh/selected_areas/accut_f.RData')
 
-
 # just checking
 
 setwd('/Users/sputnik/Documents/biomas_iavh/final_march')
@@ -328,3 +327,14 @@ ggplot(accu_ch, aes(x=pixels, y=accuracy, color=interaction(user, algorithm), sh
   scale_x_continuous(labels = scales::percent_format(scale = 100))+
   labs(x='Change (share)')
 dev.off()
+
+toffs <- list.files('.', 'cas')
+tt <- rast('def00_21m.tif')
+
+time(tt, tstep='years') <- 2000+0:21
+
+writeRaster(tt, filename='def00_21f.tif')#, overwrite=TRUE)
+map(1:nlyr(tt), function(x) writeRaster(tt[[x]], filename=toffs[x], overwrite=TRUE))
+
+tt[[1]]
+?writeRaster
